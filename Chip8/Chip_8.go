@@ -30,13 +30,15 @@ type Chip8 struct {
 }
 
 func Initialise() *Chip8 {
-	fmt.Println("Initialising CPU...")
 	// Init
 	inst := &Chip8{
 		PC: 0x200, // 0x000 - 0x1FF reserved for interpreter
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()
+
+	// Load program into program
+	inst.LoadROM()
 
 	// Return memory address of instance
 	return inst
@@ -53,24 +55,24 @@ func (c *Chip8) Cycle() {
 
 func (c Chip8) fetchOpcode() uint16 {
 	// Combination of opcode at program counter and next, achieved through bitwise shift
-	fmt.Println("Fetching Opcode..")
-	fmt.Println("At PC", c.Memory[c.PC])
-	fmt.Println("At PC + 1", c.Memory[c.PC+1])
+	// fmt.Println("Fetching Opcode..")
+	// fmt.Println("At PC", c.Memory[c.PC])
+	// fmt.Println("At PC + 1", c.Memory[c.PC+1])
 
 	opcode := uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
-	fmt.Println(opcode)
+	// fmt.Println(opcode)
 	return opcode
 }
 
 func (c *Chip8) executeOpcode(opcode uint16) {
-	fmt.Println("Executing Opcode...")
-	fmt.Println("Opcode ", opcode)
+	// fmt.Println("Executing Opcode...")
+	// fmt.Println("Opcode ", opcode)
 	var addr uint16 = (opcode & 0x0FFF)
 	var nibble byte = uint8((opcode & 0x000F))
 	var x byte = uint8((opcode & 0x0F00) >> 8)
 	var y byte = uint8((opcode & 0x00F0) >> 4)
 	var kk byte = uint8((opcode & 0x00FF))
-	fmt.Println("Addr: ", addr, "	Nibble: ", nibble, "	x: ", x, "	y: ", y)
+	// fmt.Println("Addr: ", addr, "	Nibble: ", nibble, "	x: ", x, "	y: ", y)
 
 	switch opcode & 0xF000 {
 	case 0x0000:

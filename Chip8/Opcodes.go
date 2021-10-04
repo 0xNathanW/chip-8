@@ -25,8 +25,8 @@ func (c *Chip8) CLS() {
 func (c *Chip8) RET() {
 	// Return from subroutine
 	// Set program counter back to top of stack and decrement stack pointer
-	c.PC = c.stack[c.SP]
 	c.SP--
+	c.PC = c.stack[c.SP]
 	c.PC += 2
 	/// Check order
 }
