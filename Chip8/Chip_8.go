@@ -1,12 +1,17 @@
-package Chip8
+package CHIP8
 
 import (
+	"bufio"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
+	"runtime"
+	str "strings"
 )
 
 type Chip8 struct {
-	memory [4096]byte
+	Memory [4096]byte
 	V      [16]byte // 16 CPU registers
 	index  uint16   // 16 bit register for addresses
 	stack  [16]uint16
@@ -17,9 +22,9 @@ type Chip8 struct {
 	delayTimer byte
 	soundTimer byte
 
-	drawFlag bool // Signals whether to draw on cycle
+	DrawFlag bool // Signals whether to draw on cycle
 
-	display Display
+	Display [64][32]byte // Graphics display, 64 by 32 pixels
 
 	keymap [16]bool
 }
@@ -49,45 +54,49 @@ func (c *Chip8) Cycle() {
 func (c Chip8) fetchOpcode() uint16 {
 	// Combination of opcode at program counter and next, achieved through bitwise shift
 	fmt.Println("Fetching Opcode..")
-	opcode := uint16(c.memory[c.PC])<<8 | uint16(c.memory[c.PC+1])
+	fmt.Println(c.Memory[c.PC])
+	fmt.Println(c.Memory[c.PC+1])
+
+	opcode := uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
 	fmt.Println(opcode)
 	return opcode
 }
 
 func (c *Chip8) executeOpcode(opcode uint16) {
 	fmt.Println("Executing Opcode...")
-
+	fmt.Println(opcode)
 	var addr uint16 = (opcode & 0x0FFF)
 	var nibble byte = uint8((opcode & 0x000F))
 	var x byte = uint8((opcode & 0x0F00) >> 8)
-	var y byte = uint8((opcode & 0x00F0) >> 8)
+	var y byte = uint8((opcode & 0x00F0) >> 4)
 	var kk byte = uint8((opcode & 0x00FF))
 
 	switch opcode & 0xF000 {
-	case 0:
+	case 0x0000:
 		switch nibble {
 		case 0x000:
 			c.CLS()
 		case 0x00E:
 			c.RET()
 		default:
-			fmt.Println("c.SYS()")
+			fmt.Println("Err1")
+			c.UnknownOpcode()
 		}
-	case 1:
+	case 0x1000:
 		c.JP_NNN(addr)
-	case 2:
+	case 0x2000:
 		c.CALL_NNN(addr)
-	case 3:
+	case 0x3000:
 		c.SE_VX_NN(x, kk)
-	case 4:
+	case 0x4000:
 		c.SNE_VX_NN(x, kk)
-	case 5:
+	case 0x5000:
 		c.SE_VX_VY(x, y)
-	case 6:
+	case 0x6000:
 		c.LD_VX_NN(x, kk)
-	case 7:
+	case 0x7000:
 		c.ADD_VX_NN(x, kk)
-	case 8:
+	case 0x8000:
 		switch nibble {
 		case 0:
 			c.LD_VX_VY(x, y)
@@ -108,29 +117,31 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 		case 0x000E:
 			c.SHL_VX(x)
 		default:
-			fmt.Println("Fuck knows pal")
+			fmt.Println("Err2")
+			c.UnknownOpcode()
 		}
-	case 9:
+	case 0x9000:
 		c.SNE_VX_VY(x, y)
-	case 0xA:
+	case 0xA000:
 		c.LD_I_NNN(addr)
-	case 0xB:
+	case 0xB000:
 		c.JP_V0_NNN(addr)
-	case 0xC:
+	case 0xC000:
 		c.RND_VX_NN(x, kk)
-	case 0xD:
+	case 0xD000:
 		c.DRW_VX_VY_N(x, y, nibble)
-	case 0xE:
+	case 0xE000:
 		switch nibble {
 		case 1:
 			c.SKNP_VX(x)
 		case 0x00E:
 			c.SKP_VX(x)
 		default:
-			fmt.Println("Fuck knows pal")
+			fmt.Println("Err3")
+			c.UnknownOpcode()
 		}
 
-	case 0xF:
+	case 0xF000:
 		switch nibble {
 		case 7:
 			c.LD_VX_DT(x)
@@ -153,18 +164,20 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 			case 6:
 				c.LD_VX_I(x)
 			default:
-				fmt.Println("Fuck knows pal")
+				fmt.Println("Err4")
+				c.UnknownOpcode()
 			}
 		default:
-			fmt.Println("Fuck knows pal")
+			fmt.Println("Err5")
+			c.UnknownOpcode()
 		}
 	default:
-		fmt.Println("Fuck knows pal")
+		fmt.Println("Err6")
+		c.UnknownOpcode()
 	}
 }
 
 func (c *Chip8) UpdateTimers() {
-	fmt.Println("Updating timer...")
 	if c.delayTimer > 0 {
 		c.delayTimer--
 	}
@@ -195,17 +208,74 @@ func (c *Chip8) LoadFontSet() {
 	}
 
 	for i := range fontSet {
-		c.memory[i] = fontSet[i]
+		c.Memory[i] = fontSet[i]
 	}
 }
 
-func (c *Chip8) LoadROM(ROMname string) {
-	fmt.Println(ROMname)
+func (c *Chip8) LoadROM() error {
 
-	rom, readErr := os.Open(ROMname)
-	if readErr != nil {
-		fmt.Println("You done fucked up.")
+	// Delimiter for reading input based on os
+	// End of line in windows \r\n, linux and mac just \n
+	var delim byte
+	if runtime.GOOS == "windows" {
+		delim = '\r'
+	} else {
+		delim = '\n'
 	}
 
+	// Collecting name of ROM
+	fmt.Println("Which program would you like to load:")
+	in := bufio.NewReader(os.Stdin)
+	input, err := in.ReadString(delim)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return err
+	}
+	strippedInput := str.TrimSpace(input)
+	path := "./ROMs/" + strippedInput + ".ch8"
+	// Attempt to open program
+	// If it doesnt exist list available and prompt user to try again
+	rom, openErr := os.Open(path)
+	if openErr != nil {
+		fmt.Println("Invalid ROM!")
+		fmt.Println("Programs available:")
+		files, err := ioutil.ReadDir("./ROMs")
+		if err != nil {
+			log.Fatal("ROM folder does not exist")
+		}
+
+		for _, f := range files {
+			fmt.Println(f.Name()[:len(f.Name())-4])
+		}
+		c.LoadROM()
+	}
 	defer rom.Close()
+
+	// Check that the program can fit into memory
+	info, err := rom.Stat()
+	if err != nil {
+		return err
+	}
+	_size := info.Size()
+	fmt.Println("Size of program: ", _size)
+	if int(_size) >= len(c.Memory) {
+		log.Fatal("Program you're trying to load is too large.")
+	}
+
+	// Temp array to load hold program info
+	tempAlloc := make([]byte, _size)
+	n, err := rom.Read(tempAlloc)
+	if err != nil {
+		return err
+	}
+	if n != int(_size) {
+		log.Fatal("Error reading the program.")
+	}
+
+	// Move data from tempAlloc to cpu memory
+	for b := 0; b < int(_size); b++ {
+		c.Memory[0x200+b] = tempAlloc[b]
+	}
+
+	return nil
 }

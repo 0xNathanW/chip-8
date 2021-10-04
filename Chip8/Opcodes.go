@@ -1,16 +1,24 @@
-package Chip8
+package CHIP8
 
 import (
-	"fmt"
+	"log"
 	"math/rand"
 )
 
 //----------------------------------  OPCODE FUNCTIONS  -----------------------------//
 
+func (c Chip8) UnknownOpcode() {
+	log.Fatal("Opcode Unknown")
+}
+
 func (c *Chip8) CLS() {
 	// Clear the display
-	// NOT DONE
-	fmt.Println("lol")
+	for x := 0; x < 64; x++ {
+		for y := 0; y < 32; y++ {
+			c.Display[x][y] = 0
+		}
+	}
+	c.PC += 2
 }
 
 func (c *Chip8) RET() {
@@ -47,6 +55,7 @@ func (c *Chip8) SE_VX_NN(x, kk byte) {
 	if c.V[x] == kk {
 		c.PC += 2
 	}
+	c.PC += 2
 }
 
 func (c *Chip8) SNE_VX_NN(x, kk byte) {
@@ -54,6 +63,7 @@ func (c *Chip8) SNE_VX_NN(x, kk byte) {
 	if c.V[x] != kk {
 		c.PC += 2
 	}
+	c.PC += 2
 }
 
 func (c *Chip8) SE_VX_VY(x, y byte) {
@@ -61,6 +71,7 @@ func (c *Chip8) SE_VX_VY(x, y byte) {
 	if c.V[x] == c.V[y] {
 		c.PC += 2
 	}
+	c.PC += 2
 }
 
 func (c *Chip8) SNE_VX_VY(x, y byte) {
@@ -68,23 +79,34 @@ func (c *Chip8) SNE_VX_VY(x, y byte) {
 	if c.V[x] != c.V[y] {
 		c.PC += 2
 	}
+	c.PC += 2
 }
 
 func (c *Chip8) SKP_VX(x byte) {
 	// Skip next instruction if key(Vx) is pressed
-	fmt.Println("lol")
+	if c.keymap[x] {
+		c.PC += 2
+	}
 	c.PC += 2
 }
 
 func (c *Chip8) SKNP_VX(x byte) {
 	// Skip next instruction if key(Vx) is not pressed
-	fmt.Println("lol")
+	if !c.keymap[x] {
+		c.PC += 2
+	}
 	c.PC += 2
 }
 
 func (c *Chip8) LD_VX_K(x byte) {
 	// Wait for key press, store key pressed in Vx
-	fmt.Println("lol")
+	for i, p := range c.keymap {
+		if p {
+			c.V[x] = byte(i)
+			break
+		}
+	}
+	c.PC += 2
 }
 
 func (c *Chip8) LD_VX_NN(x, kk byte) {
@@ -125,8 +147,8 @@ func (c *Chip8) LD_I_NNN(addr uint16) {
 
 func (c *Chip8) LD_F_VX(x byte) {
 	// Set I = location of sprite for digit Vx
-	// NOT DONE
-	fmt.Println("lol")
+	c.index = uint16(c.V[x]) * 5
+	c.PC += 2
 }
 
 func (c *Chip8) LD_I_VX(x byte) {
@@ -134,7 +156,7 @@ func (c *Chip8) LD_I_VX(x byte) {
 	startAddr := int(c.index)
 	for i := 0; i < int(x); i++ {
 		if startAddr+i < 4096 {
-			c.memory[i+startAddr] = c.V[i]
+			c.Memory[i+startAddr] = c.V[i]
 		}
 	}
 	c.PC += 2
@@ -145,7 +167,7 @@ func (c *Chip8) LD_VX_I(x byte) {
 	startAddr := int(c.index)
 	for i := 0; i < int(x); i++ {
 		if startAddr+i < 4096 {
-			c.V[i] = c.memory[i+startAddr]
+			c.V[i] = c.Memory[i+startAddr]
 		}
 	}
 	c.PC += 2
@@ -241,9 +263,9 @@ func (c *Chip8) SHL_VX(x byte) {
 
 func (c *Chip8) BCD_VX(x byte) {
 	// Storing binary-coded decimal representation of Vx at memory addresses
-	c.memory[c.index] = c.V[x] / 100
-	c.memory[c.index+1] = (c.V[x] / 10) % 10
-	c.memory[c.index+2] = (c.V[x] % 100) % 10
+	c.Memory[c.index] = c.V[x] / 100
+	c.Memory[c.index+1] = (c.V[x] / 10) % 10
+	c.Memory[c.index+2] = (c.V[x] % 100) % 10
 	c.PC += 2
 }
 
@@ -254,6 +276,30 @@ func (c *Chip8) RND_VX_NN(x, kk byte) {
 }
 
 func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
-	// NOT DONE
-	fmt.Println("lol")
+	// Draw sprite at Vx, Vy, sprite is n bytes large
+	xCoord := c.V[x]
+	yCoord := c.V[y]
+	// Vf flag is for collision (turning off pixel that was already on)
+	// This is due to nature of XOR operation
+	c.V[15] = 0
+	// nibble is height of sprite
+	for yLine := 0; yLine < int(nibble); yLine++ {
+		spriteLine := c.Memory[c.index+uint16(yLine)]
+		// sprite is 8 pixels wide
+		for xLine := 0; xLine < 8; xLine++ {
+			xIdx := xCoord + byte(xLine)
+			yIdx := yCoord + byte(yLine)
+			if spriteLine&(128>>xLine) != 0 {
+				if c.Display[xIdx][yIdx] == 1 {
+					// Set Vf flag on if collision
+					c.V[15] = 1
+				}
+				// XOR on pixel
+				c.Display[xIdx][yIdx] ^= 1
+			}
+		}
+	}
+	// Set drawFlag so chip knows to draw on cycle
+	c.DrawFlag = true
+	c.PC += 2
 }
