@@ -1,6 +1,7 @@
 package CHIP8
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 )
@@ -15,7 +16,7 @@ func (c *Chip8) CLS() {
 	// Clear the display
 	for x := 0; x < 64; x++ {
 		for y := 0; y < 32; y++ {
-			c.Display[x][y] = 0
+			c.Display[y][x] = 0
 		}
 	}
 	c.PC += 2
@@ -32,7 +33,9 @@ func (c *Chip8) RET() {
 
 func (c *Chip8) JP_NNN(addr uint16) {
 	// Jump to address
+	fmt.Println("Jumping to address: ", addr)
 	c.PC = addr
+	fmt.Println(c.PC)
 }
 
 func (c *Chip8) CALL_NNN(addr uint16) {
@@ -290,12 +293,12 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 			xIdx := xCoord + byte(xLine)
 			yIdx := yCoord + byte(yLine)
 			if spriteLine&(128>>xLine) != 0 {
-				if c.Display[xIdx][yIdx] == 1 {
+				if c.Display[yIdx][xIdx] == 1 {
 					// Set Vf flag on if collision
 					c.V[15] = 1
 				}
 				// XOR on pixel
-				c.Display[xIdx][yIdx] ^= 1
+				c.Display[yIdx][xIdx] ^= 1
 			}
 		}
 	}

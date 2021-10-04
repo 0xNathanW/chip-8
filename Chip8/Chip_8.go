@@ -24,7 +24,7 @@ type Chip8 struct {
 
 	DrawFlag bool // Signals whether to draw on cycle
 
-	Display [64][32]byte // Graphics display, 64 by 32 pixels
+	Display [32][64]byte // Graphics display, 64 by 32 pixels
 
 	keymap [16]bool
 }
@@ -54,8 +54,8 @@ func (c *Chip8) Cycle() {
 func (c Chip8) fetchOpcode() uint16 {
 	// Combination of opcode at program counter and next, achieved through bitwise shift
 	fmt.Println("Fetching Opcode..")
-	fmt.Println(c.Memory[c.PC])
-	fmt.Println(c.Memory[c.PC+1])
+	fmt.Println("At PC", c.Memory[c.PC])
+	fmt.Println("At PC + 1", c.Memory[c.PC+1])
 
 	opcode := uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
 	fmt.Println(opcode)
@@ -64,12 +64,13 @@ func (c Chip8) fetchOpcode() uint16 {
 
 func (c *Chip8) executeOpcode(opcode uint16) {
 	fmt.Println("Executing Opcode...")
-	fmt.Println(opcode)
+	fmt.Println("Opcode ", opcode)
 	var addr uint16 = (opcode & 0x0FFF)
 	var nibble byte = uint8((opcode & 0x000F))
 	var x byte = uint8((opcode & 0x0F00) >> 8)
 	var y byte = uint8((opcode & 0x00F0) >> 4)
 	var kk byte = uint8((opcode & 0x00FF))
+	fmt.Println("Addr: ", addr, "	Nibble: ", nibble, "	x: ", x, "	y: ", y)
 
 	switch opcode & 0xF000 {
 	case 0x0000:
