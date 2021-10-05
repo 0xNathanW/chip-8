@@ -1,8 +1,6 @@
 package CHIP8
 
 import (
-	"fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -28,7 +26,6 @@ var keys = map[ebiten.Key]byte{
 func (c *Chip8) PressedKeys() {
 	for key, val := range keys {
 		if ebiten.IsKeyPressed(key) {
-			fmt.Printf("Key pressed: %v", key)
 			c.keymap[val] = true
 		}
 	}

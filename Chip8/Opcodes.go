@@ -1,7 +1,6 @@
 package CHIP8
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 )
@@ -33,9 +32,7 @@ func (c *Chip8) RET() {
 
 func (c *Chip8) JP_NNN(addr uint16) {
 	// Jump to address
-	fmt.Println("Jumping to address: ", addr)
 	c.PC = addr
-	fmt.Println(c.PC)
 }
 
 func (c *Chip8) CALL_NNN(addr uint16) {
@@ -287,9 +284,19 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 	c.V[15] = 0
 	// nibble is height of sprite
 	for yLine := 0; yLine < int(nibble); yLine++ {
+
+		if yCoord+byte(yLine) >= 32 {
+			continue
+		}
+
 		spriteLine := c.Memory[c.index+uint16(yLine)]
 		// sprite is 8 pixels wide
 		for xLine := 0; xLine < 8; xLine++ {
+
+			if xCoord+byte(xLine) >= 64 {
+				continue
+			}
+
 			xIdx := xCoord + byte(xLine)
 			yIdx := yCoord + byte(yLine)
 			if spriteLine&(128>>xLine) != 0 {

@@ -3,6 +3,7 @@ package main
 import (
 	//"time"
 
+	"fmt"
 	"image/color"
 	"log"
 
@@ -20,7 +21,7 @@ const (
 
 var (
 	bg = color.Black
-	fg = color.White
+	fg = color.RGBA{0, 184, 0, 255}
 )
 
 type Game struct {
@@ -31,6 +32,8 @@ func (g *Game) Update() error {
 	g.emulator.PressedKeys()
 	g.emulator.Cycle()
 	g.emulator.ResetKeys()
+	fmt.Println("current TPS:", ebiten.CurrentTPS())
+	fmt.Println("current FPS: ", ebiten.CurrentFPS())
 	return nil
 }
 
@@ -63,7 +66,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
-	ebiten.SetMaxTPS(60) // Setting ticks per second
+	ebiten.SetMaxTPS(120) // Setting max ticks per second
 	ebiten.SetWindowSize(width*scaling, height*scaling)
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowTitle("Chip8")
