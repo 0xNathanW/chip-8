@@ -15,7 +15,7 @@ func (c *Chip8) CLS() {
 	// Clear the display
 	for x := 0; x < 64; x++ {
 		for y := 0; y < 32; y++ {
-			c.Display[y][x] = 0
+			c.PixelArray[y][x] = 0
 		}
 	}
 	c.PC += 2
@@ -84,7 +84,7 @@ func (c *Chip8) SNE_VX_VY(x, y byte) {
 
 func (c *Chip8) SKP_VX(x byte) {
 	// Skip next instruction if key(Vx) is pressed
-	if c.keymap[x] {
+	if c.keypad[x] {
 		c.PC += 2
 	}
 	c.PC += 2
@@ -92,7 +92,7 @@ func (c *Chip8) SKP_VX(x byte) {
 
 func (c *Chip8) SKNP_VX(x byte) {
 	// Skip next instruction if key(Vx) is not pressed
-	if !c.keymap[x] {
+	if !c.keypad[x] {
 		c.PC += 2
 	}
 	c.PC += 2
@@ -100,7 +100,7 @@ func (c *Chip8) SKNP_VX(x byte) {
 
 func (c *Chip8) LD_VX_K(x byte) {
 	// Wait for key press, store key pressed in Vx
-	for i, p := range c.keymap {
+	for i, p := range c.keypad {
 		if p {
 			c.V[x] = byte(i)
 			break
@@ -300,16 +300,16 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 			xIdx := xCoord + byte(xLine)
 			yIdx := yCoord + byte(yLine)
 			if spriteLine&(128>>xLine) != 0 {
-				if c.Display[yIdx][xIdx] == 1 {
+				if c.PixelArray[yIdx][xIdx] == 1 {
 					// Set Vf flag on if collision
 					c.V[15] = 1
 				}
 				// XOR on pixel
-				c.Display[yIdx][xIdx] ^= 1
+				c.PixelArray[yIdx][xIdx] ^= 1
 			}
 		}
 	}
 	// Set drawFlag so chip knows to draw on cycle
-	c.DrawFlag = true
+	c.Draw()
 	c.PC += 2
 }
