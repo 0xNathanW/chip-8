@@ -26,9 +26,8 @@ type Chip8 struct {
 	//=====  Output  =====//
 	DrawFlag   bool         // Signals whether to draw on cycle
 	PixelArray [32][64]byte // Graphics display, 64 by 32 pixels
-	Display    *Screen
 	//=====  Input  =====//
-	keypad [16]bool
+	Keypad [16]bool
 }
 
 func Initialise() *Chip8 {
@@ -36,7 +35,6 @@ func Initialise() *Chip8 {
 	inst := &Chip8{
 		PC:         0x200,               // 0x000 - 0x1FF reserved for interpreter
 		ClockSpeed: (time.Second / 120), // 120 clocks a second (hopefully)
-		Display:    InitDisplay(),
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()

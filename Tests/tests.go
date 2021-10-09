@@ -1,12 +1,9 @@
 package Tests
 
-import (
-	// "fmt"
-	// "github.com/hajimehoshi/ebiten/v2"
-	// "github.com/0xNathanW/CHIP-8/CHIP8"
-	// "github.com/hajimehoshi/ebiten/ebitenutil"
-	"syscall"
-)
+// "fmt"
+// "github.com/hajimehoshi/ebiten/v2"
+// "github.com/0xNathanW/CHIP-8/CHIP8"
+// "github.com/hajimehoshi/ebiten/ebitenutil"
 
 // func Test() *CHIP8.Chip8 {
 // 	inst := CHIP8.Initialise()
@@ -69,26 +66,26 @@ import (
 
 // }
 
-func get_win_size(out syscall.Handle) coord {
-	err := get_console_screen_buffer_info(out, &tmp_info)
-	if err != nil {
-		panic(err)
-	}
+// func get_win_size(out syscall.Handle) coord {
+// 	err := get_console_screen_buffer_info(out, &tmp_info)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	min_size := get_win_min_size(out)
+// 	min_size := get_win_min_size(out)
 
-	size := coord{
-		x: tmp_info.window.right - tmp_info.window.left + 1,
-		y: tmp_info.window.bottom - tmp_info.window.top + 1,
-	}
+// 	size := coord{
+// 		x: tmp_info.window.right - tmp_info.window.left + 1,
+// 		y: tmp_info.window.bottom - tmp_info.window.top + 1,
+// 	}
 
-	if size.x < min_size.x {
-		size.x = min_size.x
-	}
+// 	if size.x < min_size.x {
+// 		size.x = min_size.x
+// 	}
 
-	if size.y < min_size.y {
-		size.y = min_size.y
-	}
+// 	if size.y < min_size.y {
+// 		size.y = min_size.y
+// 	}
 
-	return size
-}
+// 	return size
+// }

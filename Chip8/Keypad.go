@@ -1,6 +1,6 @@
 package CHIP8
 
-var keymap = map[rune]byte{
+var Keymap = map[rune]byte{
 	'1': 0x1,
 	'2': 0x2,
 	'3': 0x3,
