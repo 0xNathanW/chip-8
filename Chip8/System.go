@@ -45,6 +45,7 @@ func Initialise() *Chip8 {
 	return inst
 }
 
+// Cycle will be called on each clock of CPU
 func (c *Chip8) Cycle() {
 	// Fetch opcode
 	currentOpcode := c.fetchOpcode()
@@ -183,7 +184,7 @@ func (c *Chip8) UpdateTimers() {
 }
 
 func (c *Chip8) LoadFontSet() {
-
+	// Preset sprites for numbers/letters
 	var fontSet = []byte{
 		0xF0, 0x90, 0x90, 0x90, 0xF0, //0
 		0x20, 0x60, 0x20, 0x20, 0x70, //1
