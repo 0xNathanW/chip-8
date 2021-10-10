@@ -8,31 +8,33 @@ import (
 	"os"
 	"runtime"
 	str "strings"
+	"time"
 )
 
 type Chip8 struct {
+	//=====  CPU  =====//
 	Memory [4096]byte
 	V      [16]byte // 16 CPU registers
 	index  uint16   // 16 bit register for addresses
 	stack  [16]uint16
-
-	PC uint16 // Program counter
-	SP uint8  // Pointer to top of stack
-
+	PC     uint16 // Program counter
+	SP     uint8  // Pointer to top of stack
+	//=====  Timers  =====//
 	delayTimer byte
 	soundTimer byte
-
-	DrawFlag bool // Signals whether to draw on cycle
-
-	Display [32][64]byte // Graphics display, 64 by 32 pixels
-
-	keymap [16]bool
+	ClockSpeed time.Duration
+	//=====  Output  =====//
+	DrawFlag   bool         // Signals whether to draw on cycle
+	PixelArray [32][64]byte // Graphics display, 64 by 32 pixels
+	//=====  Input  =====//
+	Keypad [16]bool
 }
 
 func Initialise() *Chip8 {
-	// Init
+	// Init pointer to chip8 instance
 	inst := &Chip8{
-		PC: 0x200, // 0x000 - 0x1FF reserved for interpreter
+		PC:         0x200,               // 0x000 - 0x1FF reserved for interpreter
+		ClockSpeed: (time.Second / 120), // 120 clocks a second (hopefully)
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()
@@ -40,10 +42,10 @@ func Initialise() *Chip8 {
 	// Load program into program
 	inst.LoadROM()
 
-	// Return memory address of instance
 	return inst
 }
 
+// Cycle will be called on each clock of CPU
 func (c *Chip8) Cycle() {
 	// Fetch opcode
 	currentOpcode := c.fetchOpcode()
@@ -54,25 +56,17 @@ func (c *Chip8) Cycle() {
 }
 
 func (c Chip8) fetchOpcode() uint16 {
-	// Combination of opcode at program counter and next, achieved through bitwise shift
-	// fmt.Println("Fetching Opcode..")
-	// fmt.Println("At PC", c.Memory[c.PC])
-	// fmt.Println("At PC + 1", c.Memory[c.PC+1])
-
 	opcode := uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
-	// fmt.Println(opcode)
 	return opcode
 }
 
 func (c *Chip8) executeOpcode(opcode uint16) {
-	// fmt.Println("Executing Opcode...")
-	// fmt.Println("Opcode ", opcode)
+
 	var addr uint16 = (opcode & 0x0FFF)
 	var nibble byte = uint8((opcode & 0x000F))
 	var x byte = uint8((opcode & 0x0F00) >> 8)
 	var y byte = uint8((opcode & 0x00F0) >> 4)
 	var kk byte = uint8((opcode & 0x00FF))
-	// fmt.Println("Addr: ", addr, "	Nibble: ", nibble, "	x: ", x, "	y: ", y)
 
 	switch opcode & 0xF000 {
 	case 0x0000:
@@ -190,7 +184,7 @@ func (c *Chip8) UpdateTimers() {
 }
 
 func (c *Chip8) LoadFontSet() {
-
+	// Preset sprites for numbers/letters
 	var fontSet = []byte{
 		0xF0, 0x90, 0x90, 0x90, 0xF0, //0
 		0x20, 0x60, 0x20, 0x20, 0x70, //1
@@ -275,7 +269,7 @@ func (c *Chip8) LoadROM() error {
 		log.Fatal("Error reading the program.")
 	}
 
-	// Move data from tempAlloc to cpu memory
+	// Move data from tempAlloc to CPU memory
 	for b := 0; b < int(_size); b++ {
 		c.Memory[0x200+b] = tempAlloc[b]
 	}
