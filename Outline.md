@@ -1,1 +1,0 @@
-How to output gfx to screen
