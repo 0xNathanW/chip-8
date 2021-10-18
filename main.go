@@ -8,9 +8,15 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+const (
+	clockSpeed       = 200
+	backgroundColour = termbox.ColorDefault
+	foregroundColour = termbox.ColorGreen
+)
+
 func main() {
 	// Initalisation
-	emulator := CHIP8.Initialise()
+	emulator := CHIP8.Initialise(clockSpeed)
 	err := termbox.Init()
 	if err != nil {
 		panic(err)
@@ -18,7 +24,10 @@ func main() {
 	defer termbox.Close()
 	termbox.SetOutputMode(termbox.OutputNormal)
 	termbox.HideCursor()
-	display := CHIP8.InitDisplay()
+	display := CHIP8.InitDisplay(
+		backgroundColour,
+		foregroundColour,
+	)
 	// Clock is a channel that is sent ticks
 	clock := time.Tick(emulator.ClockSpeed)
 
@@ -47,7 +56,11 @@ func main() {
 		case <-clock:
 			emulator.Cycle()
 			if emulator.DrawFlag {
-				display.Draw(emulator)
+				display.Draw(
+					emulator,
+					backgroundColour,
+					foregroundColour,
+				)
 				emulator.DrawFlag = false
 			}
 		}

@@ -30,11 +30,11 @@ type Chip8 struct {
 	Keypad [16]bool
 }
 
-func Initialise() *Chip8 {
+func Initialise(clocksPerSecond int) *Chip8 {
 	// Init pointer to chip8 instance
 	inst := &Chip8{
-		PC:         0x200,               // 0x000 - 0x1FF reserved for interpreter
-		ClockSpeed: (time.Second / 120), // 120 clocks a second (hopefully)
+		PC:         0x200, // 0x000 - 0x1FF reserved for interpreter
+		ClockSpeed: (time.Second / time.Duration(clocksPerSecond)),
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()

@@ -4,22 +4,16 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-const (
-	//  Foreground and background colours
-	bg = termbox.ColorDefault
-	fg = termbox.ColorBlue
-)
-
 type Display struct {
 	fg, bg termbox.Attribute
 }
 
-func InitDisplay() *Display {
-	return &Display{fg, bg}
+func InitDisplay(bg, fg termbox.Attribute) *Display {
+	return &Display{bg, fg}
 }
 
 // Draw pixels to terminal display
-func (d *Display) Draw(c *Chip8) {
+func (d *Display) Draw(c *Chip8, bg, fg termbox.Attribute) {
 	// Loop through pixels
 	for y := 0; y < len(c.PixelArray); y++ {
 		for x := 0; x < len(c.PixelArray[y]); x++ {
