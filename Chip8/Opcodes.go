@@ -84,19 +84,19 @@ func (c *Chip8) SNE_VX_VY(x, y byte) {
 
 func (c *Chip8) SKP_VX(x byte) {
 	// Skip next instruction if key(Vx) is pressed
-	if c.Keypad[x] {
+	if c.Keypad[c.V[x]] {
 		c.PC += 2
 	}
-	c.Keypad[x] = false
+	c.Keypad[c.V[x]] = false
 	c.PC += 2
 }
 
 func (c *Chip8) SKNP_VX(x byte) {
 	// Skip next instruction if key(Vx) is not pressed
-	if !c.Keypad[x] {
+	if !c.Keypad[c.V[x]] {
 		c.PC += 2
 	}
-	c.Keypad[x] = false
+	c.Keypad[c.V[x]] = false
 	c.PC += 2
 }
 
