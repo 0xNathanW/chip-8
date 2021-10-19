@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"runtime"
 	str "strings"
 	"time"
@@ -211,8 +212,8 @@ func (c *Chip8) LoadFontSet() {
 
 func (c *Chip8) LoadROM() error {
 
-	// Delimiter for reading input based on os
-	// End of line in windows \r\n, linux and mac just \n
+	// Delimiter for reading input based on os.
+	// End of line in windows \r\n, linux and mac just \n.
 	var delim byte
 	if runtime.GOOS == "windows" {
 		delim = '\r'
@@ -220,7 +221,20 @@ func (c *Chip8) LoadROM() error {
 		delim = '\n'
 	}
 
-	// Collecting name of ROM
+	// List available ROMs.
+	fmt.Println("Programs available:")
+	files, err := ioutil.ReadDir("./ROMs")
+	if err != nil {
+		log.Fatal("ROM folder does not exist")
+	}
+
+	for _, f := range files {
+		if path.Ext("./ROMs/"+f.Name()) == ".ch8" {
+			fmt.Println(f.Name()[:len(f.Name())-4])
+		}
+	}
+
+	// Collecting name of ROM.
 	fmt.Println("Which program would you like to load:")
 	in := bufio.NewReader(os.Stdin)
 	input, err := in.ReadString(delim)
@@ -230,25 +244,16 @@ func (c *Chip8) LoadROM() error {
 	}
 	strippedInput := str.TrimSpace(input)
 	path := "./ROMs/" + strippedInput + ".ch8"
-	// Attempt to open program
-	// If it doesnt exist list available and prompt user to try again
+	// Attempt to open program.
+	// If it doesnt exist list available and prompt user to try again.
 	rom, openErr := os.Open(path)
 	if openErr != nil {
 		fmt.Println("Invalid ROM!")
-		fmt.Println("Programs available:")
-		files, err := ioutil.ReadDir("./ROMs")
-		if err != nil {
-			log.Fatal("ROM folder does not exist")
-		}
-
-		for _, f := range files {
-			fmt.Println(f.Name()[:len(f.Name())-4])
-		}
 		c.LoadROM()
 	}
 	defer rom.Close()
 
-	// Check that the program can fit into memory
+	// Check that the program can fit into memory.
 	info, err := rom.Stat()
 	if err != nil {
 		return err
@@ -259,7 +264,7 @@ func (c *Chip8) LoadROM() error {
 		log.Fatal("Program you're trying to load is too large.")
 	}
 
-	// Temp array to load hold program info
+	// Temp array to load hold program info.
 	tempAlloc := make([]byte, _size)
 	n, err := rom.Read(tempAlloc)
 	if err != nil {
@@ -269,7 +274,7 @@ func (c *Chip8) LoadROM() error {
 		log.Fatal("Error reading the program.")
 	}
 
-	// Move data from tempAlloc to CPU memory
+	// Move data from tempAlloc to CPU memory.
 	for b := 0; b < int(_size); b++ {
 		c.Memory[0x200+b] = tempAlloc[b]
 	}
