@@ -3,6 +3,26 @@
 Mainly built to build understanding of computer arcitechture, specifically the CPU.  The Chip-8 is probabably the easiest emulator to build, with only 35 opcodes.  It was developed as an interpreted programming language to allow games to be more easily programmed on early 1970's machines.
 
 ## Installation:
+Make sure you have Golang installed.
+Note: When tested works fine on macOS and Linux, but termbox did'nt work on Windows.
+
+Clone GitHub repo:
+
+`git clone github.com/0xNathanW/CHIP-8`
+
+Move into directory:
+
+`cd/CHIP-8`
+
+Build binary:
+
+`go build`
+
+Run executable:
+
+`./CHIP-8`
+
+Then pick a program from the list.
 
 
 ## Brix Demo:
