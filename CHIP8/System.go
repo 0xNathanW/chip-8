@@ -32,21 +32,21 @@ type Chip8 struct {
 }
 
 func Initialise(clocksPerSecond int) *Chip8 {
-	// Init pointer to chip8 instance
+	// Init pointer to chip8 instance.
 	inst := &Chip8{
-		PC:         0x200, // 0x000 - 0x1FF reserved for interpreter
+		PC:         0x200, // 0x000 - 0x1FF reserved for interpreter.
 		ClockSpeed: (time.Second / time.Duration(clocksPerSecond)),
 	}
-	// Load fontSet into allocated memory
+	// Load fontSet into allocated memory.
 	inst.LoadFontSet()
 
-	// Load program into program
+	// Load program into program.
 	inst.LoadROM()
 
 	return inst
 }
 
-// Cycle will be called on each clock of CPU
+// Cycle will be called on each clock of CPU.
 func (c *Chip8) Cycle() {
 	// Fetch opcode
 	currentOpcode := c.fetchOpcode()

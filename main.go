@@ -28,12 +28,12 @@ func main() {
 		backgroundColour,
 		foregroundColour,
 	)
-	// Clock is a channel that is sent ticks
+	// Clock is a channel that is sent ticks.
 	clock := time.Tick(emulator.ClockSpeed)
 
-	// Channel for keypresses
+	// Channel for keypresses.
 	eventQ := make(chan termbox.Event)
-	// Goroutine to recieve keypress events
+	// Goroutine to recieve keypress events.
 	go func() {
 		for {
 			eventQ <- termbox.PollEvent()
