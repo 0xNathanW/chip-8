@@ -8,7 +8,7 @@ Note: When tested works fine on macOS and Linux, but termbox did'nt work on Wind
 
 Clone GitHub repo:
 
-`git clone github.com/0xNathanW/CHIP-8`
+`git clone https://github.com/0xNathanW/CHIP-8`
 
 Move into directory:
 
