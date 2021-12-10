@@ -1,4 +1,4 @@
-package CHIP8
+package chip8
 
 import (
 	"bufio"

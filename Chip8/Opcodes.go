@@ -1,4 +1,4 @@
-package CHIP8
+package chip8
 
 import (
 	"log"
@@ -306,13 +306,13 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 				}
 				// XOR on pixel
 				c.Display.PixelArray[yIdx][xIdx] ^= 1
-				f c.Display.PixelArray[yIdx][xIdx] == 1 {
-				c.Display.Screen.SetContent
-			}
+				if c.Display.PixelArray[yIdx][xIdx] == 1 {
+					c.Display.Screen.SetContent
+				}
 			}
 		}
 	}
-	/ Set drawFlag so chip knows to draw on cycle
+	// Set drawFlag so chip knows to draw on cycle
 	c.Display.DrawFlag = true
 	c.PC += 2
 }

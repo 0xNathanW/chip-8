@@ -1,4 +1,4 @@
-package CHIP8
+package chip8
 
 var keymap = map[rune]byte{
 	'1': 0x1,

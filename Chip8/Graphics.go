@@ -1,4 +1,4 @@
-package CHIP8
+package chip8
 
 import (
 	"fmt"
@@ -11,35 +11,22 @@ const (
 )
 
 type Display struct {
-	Screen     	tcell.Screen
-	PixelArray	[64][32]int
-	DrawFlag   	bool
-	Scale 		int
+	Screen     tcell.Screen
+	PixelArray [64][32]int
+	DrawFlag   bool
+	Scale      int
 }
 
 func NewDisplay() *Display {
 	screen, err := tcell.NewScreen()
 	if err != nil {
-		panic(fmt.Error("failed to initisialise screen ", err))
+		panic(fmt.Errorf("failed to initisialise screen %w", er))
 	}
 
 	display := &Display{
 		Screen:     screen,
-		PixelArray: [64][32]{},
+		PixelArray: [64][32]int{},
 		DrawFlag:   false,
 	}
 	return display
-}
-
-func (c *Chip8) Draw() {
-	for y := 0; y < len(c.PixelArray); y++ {
-		for x := 0; x < len(c.PixelArray[y]); x++ {
-			if c.PixelArray[y][x] == 0 {
-
-			} else {
-
-			}
-		}
-	}
-
 }
