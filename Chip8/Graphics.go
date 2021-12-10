@@ -1,47 +1,45 @@
 package CHIP8
 
 import (
-	"github.com/nsf/termbox-go"
+	"fmt"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 const (
-	//  Foreground and background colours
-	fg = termbox.ColorWhite
-	bg = termbox.ColorBlack
+//  Foreground and background colours
 )
 
-type Screen struct {
-	fg, bg termbox.Attribute
+type Display struct {
+	Screen     	tcell.Screen
+	PixelArray	[64][32]int
+	DrawFlag   	bool
+	Scale 		int
 }
 
-func TermboxSetup() error {
-	err := termbox.Init()
+func NewDisplay() *Display {
+	screen, err := tcell.NewScreen()
 	if err != nil {
-		return err
+		panic(fmt.Error("failed to initisialise screen ", err))
 	}
-	defer termbox.Close()
-	termbox.SetOutputMode(termbox.OutputNormal)
-	termbox.HideCursor()
-	err1 := termbox.Clear(bg, bg)
-	if err1 != nil {
-		return err1
-	}
-	return termbox.Flush()
-}
 
-func InitDisplay() *Screen {
-	return &Screen{fg, bg}
+	display := &Display{
+		Screen:     screen,
+		PixelArray: [64][32]{},
+		DrawFlag:   false,
+	}
+	return display
 }
 
 func (c *Chip8) Draw() {
 	for y := 0; y < len(c.PixelArray); y++ {
 		for x := 0; x < len(c.PixelArray[y]); x++ {
 			if c.PixelArray[y][x] == 0 {
-				termbox.SetCell(x, y, rune(' '), c.Display.fg, c.Display.bg)
+
 			} else {
-				termbox.SetCell(x, y, rune(' '), c.Display.fg, c.Display.bg)
+
 			}
 		}
 	}
-	termbox.Flush()
+
 }

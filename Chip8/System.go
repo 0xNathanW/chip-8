@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const clockSpeed = (time.Second / 120)
+
 type Chip8 struct {
 	//=====  CPU  =====//
 	Memory [4096]byte
@@ -23,20 +25,18 @@ type Chip8 struct {
 	delayTimer byte
 	soundTimer byte
 	ClockSpeed time.Duration
-	//=====  Output  =====//
-	DrawFlag   bool         // Signals whether to draw on cycle
-	PixelArray [32][64]byte // Graphics display, 64 by 32 pixels
-	Display    *Screen
+	//=====  GFX  =====//
+	Display *Display
 	//=====  Input  =====//
 	keypad [16]bool
 }
 
-func Initialise() *Chip8 {
+func NewSystem() *Chip8 {
 	// Init pointer to chip8 instance
 	inst := &Chip8{
-		PC:         0x200,               // 0x000 - 0x1FF reserved for interpreter
-		ClockSpeed: (time.Second / 120), // 120 clocks a second (hopefully)
-		Display:    InitDisplay(),
+		PC:         0x200,      // 0x000 - 0x1FF reserved for interpreter
+		ClockSpeed: clockSpeed, // 120 clocks a second (hopefully)
+		Display:    NewDisplay(),
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()

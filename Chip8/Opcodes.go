@@ -15,7 +15,7 @@ func (c *Chip8) CLS() {
 	// Clear the display
 	for x := 0; x < 64; x++ {
 		for y := 0; y < 32; y++ {
-			c.PixelArray[y][x] = 0
+			c.Display.PixelArray[y][x] = 0
 		}
 	}
 	c.PC += 2
@@ -300,16 +300,19 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 			xIdx := xCoord + byte(xLine)
 			yIdx := yCoord + byte(yLine)
 			if spriteLine&(128>>xLine) != 0 {
-				if c.PixelArray[yIdx][xIdx] == 1 {
+				if c.Display.PixelArray[yIdx][xIdx] == 1 {
 					// Set Vf flag on if collision
 					c.V[15] = 1
 				}
 				// XOR on pixel
-				c.PixelArray[yIdx][xIdx] ^= 1
+				c.Display.PixelArray[yIdx][xIdx] ^= 1
+				f c.Display.PixelArray[yIdx][xIdx] == 1 {
+				c.Display.Screen.SetContent
+			}
 			}
 		}
 	}
-	// Set drawFlag so chip knows to draw on cycle
-	c.Draw()
+	/ Set drawFlag so chip knows to draw on cycle
+	c.Display.DrawFlag = true
 	c.PC += 2
 }
