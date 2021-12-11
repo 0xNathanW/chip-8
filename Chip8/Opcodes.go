@@ -7,15 +7,16 @@ import (
 
 //----------------------------------  OPCODE FUNCTIONS  -----------------------------//
 
-func (c Chip8) UnknownOpcode() {
-	log.Fatal("Opcode Unknown")
+func (c Chip8) UnknownOpcode(opcode uint16) {
+	// hex of opcode
+	log.Fatalf("Unknown opcode: %X\n", opcode)
 }
 
 func (c *Chip8) CLS() {
 	// Clear the display
 	for x := 0; x < 64; x++ {
 		for y := 0; y < 32; y++ {
-			c.Display.PixelArray[y][x] = 0
+			c.Display.PixelArray[x][y] = 0
 		}
 	}
 	c.PC += 2
@@ -300,19 +301,27 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 			xIdx := xCoord + byte(xLine)
 			yIdx := yCoord + byte(yLine)
 			if spriteLine&(128>>xLine) != 0 {
-				if c.Display.PixelArray[yIdx][xIdx] == 1 {
+				if c.Display.PixelArray[xIdx][yIdx] == 1 {
 					// Set Vf flag on if collision
 					c.V[15] = 1
 				}
 				// XOR on pixel
-				c.Display.PixelArray[yIdx][xIdx] ^= 1
-				if c.Display.PixelArray[yIdx][xIdx] == 1 {
-					c.Display.Screen.SetContent
+				c.Display.PixelArray[xIdx][yIdx] ^= 1
+				x := int(xIdx)
+				y := int(yIdx)
+				if c.Display.PixelArray[x][y] == 1 {
+					c.Display.Screen.SetContent(x*(c.Display.Scale+1), y*c.Display.Scale, '█', nil, c.Display.Style)
+					c.Display.Screen.SetContent(x*(c.Display.Scale+1)+1, y*c.Display.Scale, '█', nil, c.Display.Style)
+				} else {
+					char, _, _, _ := c.Display.Screen.GetContent(x*(c.Display.Scale+1), y*c.Display.Scale)
+					if char == '█' {
+						c.Display.Screen.SetContent(x*(c.Display.Scale+1), y*c.Display.Scale, ' ', nil, c.Display.Style)
+						c.Display.Screen.SetContent(x*(c.Display.Scale+1)+1, y*c.Display.Scale, ' ', nil, c.Display.Style)
+					}
 				}
 			}
 		}
 	}
-	// Set drawFlag so chip knows to draw on cycle
 	c.Display.DrawFlag = true
 	c.PC += 2
 }

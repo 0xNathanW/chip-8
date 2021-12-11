@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const clockSpeed = (time.Second / 120)
+const clockSpeed = (time.Second / 500)
 
 type Chip8 struct {
 	//=====  CPU  =====//
@@ -34,8 +34,8 @@ type Chip8 struct {
 func NewSystem() *Chip8 {
 	// Init pointer to chip8 instance
 	inst := &Chip8{
-		PC:         0x200,      // 0x000 - 0x1FF reserved for interpreter
-		ClockSpeed: clockSpeed, // 120 clocks a second (hopefully)
+		PC:         0x200, // 0x000 - 0x1FF reserved for interpreter
+		ClockSpeed: clockSpeed,
 		Display:    NewDisplay(),
 	}
 	// Load fontSet into allocated memory
@@ -52,8 +52,6 @@ func (c *Chip8) Cycle() {
 	currentOpcode := c.fetchOpcode()
 	// Execute opcode
 	c.executeOpcode(currentOpcode)
-	// Update timers
-	c.UpdateTimers()
 }
 
 func (c Chip8) fetchOpcode() uint16 {
@@ -77,8 +75,7 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 		case 0x00E:
 			c.RET()
 		default:
-			fmt.Println("Err1")
-			c.UnknownOpcode()
+			c.UnknownOpcode(opcode)
 		}
 	case 0x1000:
 		c.JP_NNN(addr)
@@ -115,8 +112,7 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 		case 0x000E:
 			c.SHL_VX(x)
 		default:
-			fmt.Println("Err2")
-			c.UnknownOpcode()
+			c.UnknownOpcode(opcode)
 		}
 	case 0x9000:
 		c.SNE_VX_VY(x, y)
@@ -135,8 +131,7 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 		case 0x00E:
 			c.SKP_VX(x)
 		default:
-			fmt.Println("Err3")
-			c.UnknownOpcode()
+			c.UnknownOpcode(opcode)
 		}
 
 	case 0xF000:
@@ -162,16 +157,13 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 			case 6:
 				c.LD_VX_I(x)
 			default:
-				fmt.Println("Err4")
-				c.UnknownOpcode()
+				c.UnknownOpcode(opcode)
 			}
 		default:
-			fmt.Println("Err5")
-			c.UnknownOpcode()
+			c.UnknownOpcode(opcode)
 		}
 	default:
-		fmt.Println("Err6")
-		c.UnknownOpcode()
+		c.UnknownOpcode(opcode)
 	}
 }
 

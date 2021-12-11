@@ -1,6 +1,6 @@
 package chip8
 
-var keymap = map[rune]byte{
+var KeyMap = map[rune]byte{
 	'1': 0x1,
 	'2': 0x2,
 	'3': 0x3,
@@ -18,7 +18,3 @@ var keymap = map[rune]byte{
 	'c': 0xB,
 	'v': 0xF,
 }
-
-// func keyPressed() {
-
-// }
