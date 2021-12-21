@@ -30,26 +30,9 @@ func (c *Chip8) Run() {
 		}
 	}()
 
-	go func() {
-		for {
-			<-screen.C
-			c.Display.Screen.Show()
-		}
-	}()
-
-	go func() {
-		for {
-			<-timers.C
-			c.UpdateTimers()
-		}
-	}()
-
 	fmt.Println("Running...")
 	for {
 		select {
-		case <-clock.C:
-			c.Cycle()
-
 		case event := <-eventQ:
 			if key, ok := event.(*tcell.EventKey); ok {
 
@@ -58,12 +41,20 @@ func (c *Chip8) Run() {
 				}
 
 				if k, ok := KeyMap[key.Rune()]; ok {
-					fmt.Println(key.Name())
-					c.keypad[k] = true
+					// Debug: is printing correctly.
+					c.Keypad[k] = true
 				}
 			}
-		}
 
+		case <-clock.C:
+			c.Cycle()
+
+		case <-timers.C:
+			c.UpdateTimers()
+
+		case <-screen.C:
+			c.Display.Screen.Show()
+		}
 	}
 
 }

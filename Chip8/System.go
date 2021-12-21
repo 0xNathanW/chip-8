@@ -28,7 +28,7 @@ type Chip8 struct {
 	//=====  GFX  =====//
 	Display *Display
 	//=====  Input  =====//
-	keypad [16]bool
+	Keypad [16]bool
 }
 
 func NewSystem() *Chip8 {

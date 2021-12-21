@@ -12,7 +12,7 @@ const (
 	bg = tcell.ColorBlack
 	fg = tcell.ColorWhite
 	// Screen refreshes per second.
-	refreshRate = time.Second / 120
+	refreshRate = time.Second / 60
 )
 
 type Display struct {
@@ -32,7 +32,6 @@ func NewDisplay() *Display {
 	display := &Display{
 		Screen:     screen,
 		PixelArray: [64][32]int{},
-		DrawFlag:   false,
 		Scale:      1,
 		Style:      tcell.StyleDefault.Foreground(fg).Background(bg),
 	}

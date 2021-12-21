@@ -85,23 +85,25 @@ func (c *Chip8) SNE_VX_VY(x, y byte) {
 
 func (c *Chip8) SKP_VX(x byte) {
 	// Skip next instruction if key(Vx) is pressed
-	if c.keypad[x] {
+	if c.Keypad[c.V[x]] {
 		c.PC += 2
 	}
+	c.Keypad[c.V[x]] = false
 	c.PC += 2
 }
 
 func (c *Chip8) SKNP_VX(x byte) {
 	// Skip next instruction if key(Vx) is not pressed
-	if !c.keypad[x] {
+	if !c.Keypad[c.V[x]] {
 		c.PC += 2
 	}
+	c.Keypad[c.V[x]] = false
 	c.PC += 2
 }
 
 func (c *Chip8) LD_VX_K(x byte) {
 	// Wait for key press, store key pressed in Vx
-	for i, p := range c.keypad {
+	for i, p := range c.Keypad {
 		if p {
 			c.V[x] = byte(i)
 			break
@@ -322,6 +324,5 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 			}
 		}
 	}
-	c.Display.DrawFlag = true
 	c.PC += 2
 }
