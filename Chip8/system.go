@@ -1,13 +1,8 @@
 package chip8
 
 import (
-	"bufio"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
-	str "strings"
 	"time"
 )
 
@@ -26,7 +21,8 @@ type Chip8 struct {
 	soundTimer byte
 	ClockSpeed time.Duration
 	//=====  GFX  =====//
-	Display *Display
+	Display [64][32]int
+	DrawFlag bool
 	//=====  Input  =====//
 	Keypad [16]bool
 }
@@ -36,13 +32,13 @@ func NewSystem() *Chip8 {
 	inst := &Chip8{
 		PC:         0x200, // 0x000 - 0x1FF reserved for interpreter
 		ClockSpeed: clockSpeed,
-		Display:    NewDisplay(),
+		Display:    [64][32]int{},
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()
 
 	// Load program into program
-	inst.LoadROM()
+	//inst.LoadROM()
 
 	return inst
 }
@@ -60,7 +56,6 @@ func (c Chip8) fetchOpcode() uint16 {
 }
 
 func (c *Chip8) executeOpcode(opcode uint16) {
-
 	var addr uint16 = (opcode & 0x0FFF)
 	var nibble byte = uint8((opcode & 0x000F))
 	var x byte = uint8((opcode & 0x0F00) >> 8)
@@ -177,7 +172,6 @@ func (c *Chip8) UpdateTimers() {
 }
 
 func (c *Chip8) LoadFontSet() {
-
 	var fontSet = []byte{
 		0xF0, 0x90, 0x90, 0x90, 0xF0, //0
 		0x20, 0x60, 0x20, 0x20, 0x70, //1
@@ -196,76 +190,38 @@ func (c *Chip8) LoadFontSet() {
 		0xF0, 0x80, 0xF0, 0x80, 0xF0, //E
 		0xF0, 0x80, 0xF0, 0x80, 0x80, //F
 	}
-
 	for i := range fontSet {
 		c.Memory[i] = fontSet[i]
 	}
 }
 
-func (c *Chip8) LoadROM() error {
-
-	// Delimiter for reading input based on os
-	// End of line in windows \r\n, linux and mac just \n
-	var delim byte
-	if runtime.GOOS == "windows" {
-		delim = '\r'
-	} else {
-		delim = '\n'
-	}
-
-	// Collecting name of ROM
-	fmt.Println("Which program would you like to load:")
-	in := bufio.NewReader(os.Stdin)
-	input, err := in.ReadString(delim)
+func (c *Chip8) LoadROM(file string) {
+	path := "./ROMs/" + file
+	rom, err := os.Open(path)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return err
-	}
-	strippedInput := str.TrimSpace(input)
-	path := "./ROMs/" + strippedInput + ".ch8"
-	// Attempt to open program
-	// If it doesnt exist list available and prompt user to try again
-	rom, openErr := os.Open(path)
-	if openErr != nil {
-		fmt.Println("Invalid ROM!")
-		fmt.Println("Programs available:")
-		files, err := ioutil.ReadDir("./ROMs")
-		if err != nil {
-			log.Fatal("ROM folder does not exist")
-		}
-
-		for _, f := range files {
-			fmt.Println(f.Name()[:len(f.Name())-4])
-		}
-		c.LoadROM()
+		log.Fatal(err)
 	}
 	defer rom.Close()
-
-	// Check that the program can fit into memory
+	// Check that the program can fit into memory.
 	info, err := rom.Stat()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	_size := info.Size()
-	fmt.Println("Size of program: ", _size)
 	if int(_size) >= len(c.Memory) {
 		log.Fatal("Program you're trying to load is too large.")
 	}
-
-	// Temp array to load hold program info
+	// Temp buffer to load hold program info.
 	tempAlloc := make([]byte, _size)
 	n, err := rom.Read(tempAlloc)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if n != int(_size) {
 		log.Fatal("Error reading the program.")
 	}
-
-	// Move data from tempAlloc to CPU memory
+	// Move data from tempAlloc to memory.
 	for b := 0; b < int(_size); b++ {
 		c.Memory[0x200+b] = tempAlloc[b]
 	}
-
-	return nil
 }
