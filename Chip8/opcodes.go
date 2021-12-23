@@ -7,7 +7,7 @@ import (
 
 //----------------------------------  OPCODE FUNCTIONS  -----------------------------//
 
-func (c Chip8) UnknownOpcode(opcode uint16) {
+func (c Chip8) unknownOpcode(opcode uint16) {
 	// hex of opcode
 	log.Fatalf("Unknown opcode: %X\n", opcode)
 }
@@ -16,7 +16,7 @@ func (c *Chip8) CLS() {
 	// Clear the display
 	for x := 0; x < 64; x++ {
 		for y := 0; y < 32; y++ {
-			c.Display.PixelArray[x][y] = 0
+			c.display.pixelArray[x][y] = 0
 		}
 	}
 	c.PC += 2
@@ -85,25 +85,25 @@ func (c *Chip8) SNE_VX_VY(x, y byte) {
 
 func (c *Chip8) SKP_VX(x byte) {
 	// Skip next instruction if key(Vx) is pressed
-	if c.Keypad[c.V[x]] {
+	if c.keypad[c.V[x]] {
 		c.PC += 2
 	}
-	c.Keypad[c.V[x]] = false
+	c.keypad[c.V[x]] = false
 	c.PC += 2
 }
 
 func (c *Chip8) SKNP_VX(x byte) {
 	// Skip next instruction if key(Vx) is not pressed
-	if !c.Keypad[c.V[x]] {
+	if !c.keypad[c.V[x]] {
 		c.PC += 2
 	}
-	c.Keypad[c.V[x]] = false
+	c.keypad[c.V[x]] = false
 	c.PC += 2
 }
 
 func (c *Chip8) LD_VX_K(x byte) {
 	// Wait for key press, store key pressed in Vx
-	for i, p := range c.Keypad {
+	for i, p := range c.keypad {
 		if p {
 			c.V[x] = byte(i)
 			break
@@ -159,7 +159,7 @@ func (c *Chip8) LD_I_VX(x byte) {
 	startAddr := int(c.index)
 	for i := 0; i < int(x); i++ {
 		if startAddr+i < 4096 {
-			c.Memory[i+startAddr] = c.V[i]
+			c.memory[i+startAddr] = c.V[i]
 		}
 	}
 	c.PC += 2
@@ -170,7 +170,7 @@ func (c *Chip8) LD_VX_I(x byte) {
 	startAddr := int(c.index)
 	for i := 0; i < int(x); i++ {
 		if startAddr+i < 4096 {
-			c.V[i] = c.Memory[i+startAddr]
+			c.V[i] = c.memory[i+startAddr]
 		}
 	}
 	c.PC += 2
@@ -266,9 +266,9 @@ func (c *Chip8) SHL_VX(x byte) {
 
 func (c *Chip8) BCD_VX(x byte) {
 	// Storing binary-coded decimal representation of Vx at memory addresses
-	c.Memory[c.index] = c.V[x] / 100
-	c.Memory[c.index+1] = (c.V[x] / 10) % 10
-	c.Memory[c.index+2] = (c.V[x] % 100) % 10
+	c.memory[c.index] = c.V[x] / 100
+	c.memory[c.index+1] = (c.V[x] / 10) % 10
+	c.memory[c.index+2] = (c.V[x] % 100) % 10
 	c.PC += 2
 }
 
@@ -292,7 +292,7 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 			continue
 		}
 
-		spriteLine := c.Memory[c.index+uint16(yLine)]
+		spriteLine := c.memory[c.index+uint16(yLine)]
 		// sprite is 8 pixels wide
 		for xLine := 0; xLine < 8; xLine++ {
 
@@ -303,22 +303,22 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 			xIdx := xCoord + byte(xLine)
 			yIdx := yCoord + byte(yLine)
 			if spriteLine&(128>>xLine) != 0 {
-				if c.Display.PixelArray[xIdx][yIdx] == 1 {
+				if c.display.pixelArray[xIdx][yIdx] == 1 {
 					// Set Vf flag on if collision
 					c.V[15] = 1
 				}
 				// XOR on pixel
-				c.Display.PixelArray[xIdx][yIdx] ^= 1
+				c.display.pixelArray[xIdx][yIdx] ^= 1
 				x := int(xIdx)
 				y := int(yIdx)
-				if c.Display.PixelArray[x][y] == 1 {
-					c.Display.Screen.SetContent(x*(c.Display.Scale+1), y*c.Display.Scale, '█', nil, c.Display.Style)
-					c.Display.Screen.SetContent(x*(c.Display.Scale+1)+1, y*c.Display.Scale, '█', nil, c.Display.Style)
+				if c.display.pixelArray[x][y] == 1 {
+					c.display.screen.SetContent(x*(c.display.scale+1), y*c.display.scale, '█', nil, c.display.style)
+					c.display.screen.SetContent(x*(c.display.scale+1)+1, y*c.display.scale, '█', nil, c.display.style)
 				} else {
-					char, _, _, _ := c.Display.Screen.GetContent(x*(c.Display.Scale+1), y*c.Display.Scale)
+					char, _, _, _ := c.display.screen.GetContent(x*(c.display.scale+1), y*c.display.scale)
 					if char == '█' {
-						c.Display.Screen.SetContent(x*(c.Display.Scale+1), y*c.Display.Scale, ' ', nil, c.Display.Style)
-						c.Display.Screen.SetContent(x*(c.Display.Scale+1)+1, y*c.Display.Scale, ' ', nil, c.Display.Style)
+						c.display.screen.SetContent(x*(c.display.scale+1), y*c.display.scale, ' ', nil, c.display.style)
+						c.display.screen.SetContent(x*(c.display.scale+1)+1, y*c.display.scale, ' ', nil, c.display.style)
 					}
 				}
 			}

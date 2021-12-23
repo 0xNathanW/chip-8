@@ -15,25 +15,33 @@ const (
 	refreshRate = time.Second / 60
 )
 
-type Display struct {
-	Screen     tcell.Screen
-	PixelArray [64][32]int
-	DrawFlag   bool
-	Scale      int
-	Style      tcell.Style
+type display struct {
+	screen     tcell.Screen
+	pixelArray [64][32]int
+	scale      int
+	style      tcell.Style
 }
 
-func NewDisplay() *Display {
+func newDisplay() *display {
 	screen, err := tcell.NewScreen()
 	if err != nil {
 		panic(fmt.Errorf("failed to initisialise screen %w", err))
 	}
 
-	display := &Display{
-		Screen:     screen,
-		PixelArray: [64][32]int{},
-		Scale:      1,
-		Style:      tcell.StyleDefault.Foreground(fg).Background(bg),
+	display := &display{
+		screen:     screen,
+		pixelArray: [64][32]int{},
+		style:      tcell.StyleDefault.Foreground(fg).Background(bg),
 	}
+	display.setScale(screen.Size())
 	return display
+}
+
+func (d *display) setScale(w, h int) {
+	a, b := w/128, h/32
+	if a < b {
+		d.scale = a
+	} else {
+		d.scale = b
+	}
 }

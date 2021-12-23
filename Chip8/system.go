@@ -15,7 +15,7 @@ const clockSpeed = (time.Second / 500)
 
 type Chip8 struct {
 	//=====  CPU  =====//
-	Memory [4096]byte
+	memory [4096]byte
 	V      [16]byte // 16 CPU registers
 	index  uint16   // 16 bit register for addresses
 	stack  [16]uint16
@@ -26,9 +26,9 @@ type Chip8 struct {
 	soundTimer byte
 	ClockSpeed time.Duration
 	//=====  GFX  =====//
-	Display *Display
+	display *display
 	//=====  Input  =====//
-	Keypad [16]bool
+	keypad [16]bool
 }
 
 func NewSystem() *Chip8 {
@@ -36,7 +36,7 @@ func NewSystem() *Chip8 {
 	inst := &Chip8{
 		PC:         0x200, // 0x000 - 0x1FF reserved for interpreter
 		ClockSpeed: clockSpeed,
-		Display:    NewDisplay(),
+		display:    newDisplay(),
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()
@@ -55,7 +55,7 @@ func (c *Chip8) Cycle() {
 }
 
 func (c Chip8) fetchOpcode() uint16 {
-	opcode := uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
+	opcode := uint16(c.memory[c.PC])<<8 | uint16(c.memory[c.PC+1])
 	return opcode
 }
 
@@ -75,7 +75,7 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 		case 0x00E:
 			c.RET()
 		default:
-			c.UnknownOpcode(opcode)
+			c.unknownOpcode(opcode)
 		}
 	case 0x1000:
 		c.JP_NNN(addr)
@@ -112,7 +112,7 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 		case 0x000E:
 			c.SHL_VX(x)
 		default:
-			c.UnknownOpcode(opcode)
+			c.unknownOpcode(opcode)
 		}
 	case 0x9000:
 		c.SNE_VX_VY(x, y)
@@ -131,7 +131,7 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 		case 0x00E:
 			c.SKP_VX(x)
 		default:
-			c.UnknownOpcode(opcode)
+			c.unknownOpcode(opcode)
 		}
 
 	case 0xF000:
@@ -157,13 +157,13 @@ func (c *Chip8) executeOpcode(opcode uint16) {
 			case 6:
 				c.LD_VX_I(x)
 			default:
-				c.UnknownOpcode(opcode)
+				c.unknownOpcode(opcode)
 			}
 		default:
-			c.UnknownOpcode(opcode)
+			c.unknownOpcode(opcode)
 		}
 	default:
-		c.UnknownOpcode(opcode)
+		c.unknownOpcode(opcode)
 	}
 }
 
@@ -198,7 +198,7 @@ func (c *Chip8) LoadFontSet() {
 	}
 
 	for i := range fontSet {
-		c.Memory[i] = fontSet[i]
+		c.memory[i] = fontSet[i]
 	}
 }
 
@@ -248,7 +248,7 @@ func (c *Chip8) LoadROM() error {
 	}
 	_size := info.Size()
 	fmt.Println("Size of program: ", _size)
-	if int(_size) >= len(c.Memory) {
+	if int(_size) >= len(c.memory) {
 		log.Fatal("Program you're trying to load is too large.")
 	}
 
@@ -264,7 +264,7 @@ func (c *Chip8) LoadROM() error {
 
 	// Move data from tempAlloc to CPU memory
 	for b := 0; b < int(_size); b++ {
-		c.Memory[0x200+b] = tempAlloc[b]
+		c.memory[0x200+b] = tempAlloc[b]
 	}
 
 	return nil

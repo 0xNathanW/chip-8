@@ -10,12 +10,12 @@ import (
 
 func (c *Chip8) Run() {
 
-	err := c.Display.Screen.Init()
+	err := c.display.screen.Init()
 	if err != nil {
 		panic(fmt.Errorf("error initializing screen: %v", err))
 	}
-	c.Display.Screen.HideCursor()
-	defer c.Display.Screen.Fini()
+	c.display.screen.HideCursor()
+	defer c.display.screen.Fini()
 
 	clock := time.NewTicker(c.ClockSpeed)
 	screen := time.NewTicker(refreshRate)
@@ -26,11 +26,10 @@ func (c *Chip8) Run() {
 
 	go func() {
 		for {
-			eventQ <- c.Display.Screen.PollEvent()
+			eventQ <- c.display.screen.PollEvent()
 		}
 	}()
 
-	fmt.Println("Running...")
 	for {
 		select {
 		case event := <-eventQ:
@@ -40,10 +39,15 @@ func (c *Chip8) Run() {
 					os.Exit(0)
 				}
 
-				if k, ok := KeyMap[key.Rune()]; ok {
+				if k, ok := keyMap[key.Rune()]; ok {
 					// Debug: is printing correctly.
-					c.Keypad[k] = true
+					c.keypad[k] = true
 				}
+			}
+
+			if ev, ok := event.(*tcell.EventResize); ok {
+				c.display.setScale(ev.Size())
+				c.display.screen.Sync()
 			}
 
 		case <-clock.C:
@@ -53,7 +57,7 @@ func (c *Chip8) Run() {
 			c.UpdateTimers()
 
 		case <-screen.C:
-			c.Display.Screen.Show()
+			c.display.screen.Show()
 		}
 	}
 
