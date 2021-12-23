@@ -309,20 +309,9 @@ func (c *Chip8) DRW_VX_VY_N(x, y, nibble byte) {
 				}
 				// XOR on pixel
 				c.display.pixelArray[xIdx][yIdx] ^= 1
-				x := int(xIdx)
-				y := int(yIdx)
-				if c.display.pixelArray[x][y] == 1 {
-					c.display.screen.SetContent(x*(c.display.scale+1), y*c.display.scale, '█', nil, c.display.style)
-					c.display.screen.SetContent(x*(c.display.scale+1)+1, y*c.display.scale, '█', nil, c.display.style)
-				} else {
-					char, _, _, _ := c.display.screen.GetContent(x*(c.display.scale+1), y*c.display.scale)
-					if char == '█' {
-						c.display.screen.SetContent(x*(c.display.scale+1), y*c.display.scale, ' ', nil, c.display.style)
-						c.display.screen.SetContent(x*(c.display.scale+1)+1, y*c.display.scale, ' ', nil, c.display.style)
-					}
-				}
 			}
 		}
 	}
+	c.display.draw()
 	c.PC += 2
 }

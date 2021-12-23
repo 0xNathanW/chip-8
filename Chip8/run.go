@@ -45,9 +45,9 @@ func (c *Chip8) Run() {
 				}
 			}
 
-			if ev, ok := event.(*tcell.EventResize); ok {
-				c.display.setScale(ev.Size())
+			if _, ok := event.(*tcell.EventResize); ok {
 				c.display.screen.Sync()
+				fmt.Println("Resize")
 			}
 
 		case <-clock.C:
