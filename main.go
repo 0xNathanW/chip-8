@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	// flags determine colours.
 	flag.StringVar(&chip8.Bg, "bg", "black", "Background colour")
 	flag.StringVar(&chip8.Fg, "fg", "white", "Foreground colour")
 	flag.Parse()

@@ -39,12 +39,11 @@ func newDisplay() *display {
 						Foreground(foreground).
 						Background(background),
 	}
-	//display.setScale(screen.Size())
 	return display
 }
 
+// Draws pixel array to screen.
 func (d *display) draw() {
-
 	for y := 0; y < 32; y++ {
 		for x := 0; x < 64; x++ {
 			var char rune
@@ -59,11 +58,15 @@ func (d *display) draw() {
 	}
 }
 
-// func (d *display) setScale(w, h int) {
-// 	a, b := w/128, h/32
-// 	if a < b {
-// 		d.scale = a
-// 	} else {
-// 		d.scale = b
-// 	}
-// }
+// Draw a singular line of text to screen.
+func (d *display) drawLine(x int, y int, text string, highlight bool) {
+	if highlight {
+		for i:=0; i < len(text); i++ {
+			d.screen.SetContent(x+i, y, rune(text[i]), nil, d.style.Reverse(true))
+		}
+	} else {
+		for i:=0; i < len(text); i++ {
+			d.screen.SetContent(x+i, y, rune(text[i]), nil, d.style)
+		}
+	}
+}

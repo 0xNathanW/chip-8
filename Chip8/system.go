@@ -1,17 +1,13 @@
 package chip8
 
 import (
-	"bufio"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
-	str "strings"
 	"time"
 )
 
-const clockSpeed = (time.Second / 500)
+const clockSpeed = (time.Second / 700)
 
 type Chip8 struct {
 	//=====  CPU  =====//
@@ -29,6 +25,8 @@ type Chip8 struct {
 	display *display
 	//=====  Input  =====//
 	keypad [16]bool
+	//=====  Misc  =====//
+	isPaused bool
 }
 
 func NewSystem() *Chip8 {
@@ -40,9 +38,6 @@ func NewSystem() *Chip8 {
 	}
 	// Load fontSet into allocated memory
 	inst.LoadFontSet()
-
-	// Load program into program
-	inst.LoadROM()
 
 	return inst
 }
@@ -202,70 +197,48 @@ func (c *Chip8) LoadFontSet() {
 	}
 }
 
-func (c *Chip8) LoadROM() error {
-
-	// Delimiter for reading input based on os
-	// End of line in windows \r\n, linux and mac just \n
-	var delim byte
-	if runtime.GOOS == "windows" {
-		delim = '\r'
-	} else {
-		delim = '\n'
-	}
-
-	// Collecting name of ROM
-	fmt.Println("Which program would you like to load:")
-	in := bufio.NewReader(os.Stdin)
-	input, err := in.ReadString(delim)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return err
-	}
-	strippedInput := str.TrimSpace(input)
-	path := "./ROMs/" + strippedInput + ".ch8"
+func (c *Chip8) LoadROM(file string) {
+	path := "./ROMs/" + file
 	// Attempt to open program
 	// If it doesnt exist list available and prompt user to try again
-	rom, openErr := os.Open(path)
-	if openErr != nil {
-		fmt.Println("Invalid ROM!")
-		fmt.Println("Programs available:")
-		files, err := ioutil.ReadDir("./ROMs")
-		if err != nil {
-			log.Fatal("ROM folder does not exist")
-		}
-
-		for _, f := range files {
-			fmt.Println(f.Name()[:len(f.Name())-4])
-		}
-		c.LoadROM()
+	rom, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
 	}
 	defer rom.Close()
-
 	// Check that the program can fit into memory
 	info, err := rom.Stat()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	_size := info.Size()
 	fmt.Println("Size of program: ", _size)
 	if int(_size) >= len(c.memory) {
 		log.Fatal("Program you're trying to load is too large.")
 	}
-
 	// Temp array to load hold program info
 	tempAlloc := make([]byte, _size)
 	n, err := rom.Read(tempAlloc)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if n != int(_size) {
 		log.Fatal("Error reading the program.")
 	}
-
 	// Move data from tempAlloc to CPU memory
 	for b := 0; b < int(_size); b++ {
 		c.memory[0x200+b] = tempAlloc[b]
 	}
 
-	return nil
+}
+
+func (c *Chip8) reset() {
+	c.PC = 0x200
+	c.index = 0
+	c.SP = 0
+	c.delayTimer = 0
+	c.soundTimer = 0
+	c.V = [16]byte{}
+	c.stack = [16]uint16{}
+	c.display.pixelArray = [64][32]int{}
 }
