@@ -114,8 +114,8 @@ func (c *Chip8) chooseROM() {
 
 	txt := "Select a ROM to run:"
 	div := "---------------------"
-	c.display.drawLine(offset, 5, txt, false)
-	c.display.drawLine(offset, 6, div, false)
+	c.display.drawLine(offset, 2, txt, false)
+	c.display.drawLine(offset, 3, div, false)
 
 	roms := make(map[int]string)
 
@@ -128,9 +128,9 @@ func (c *Chip8) chooseROM() {
 	for i, file := range files {
 		roms[i] = file.Name()
 		if i == 0 {
-			c.display.drawLine(offset, i+7, file.Name(), true)
+			c.display.drawLine(offset, i+4, file.Name(), true)
 		} else {
-			c.display.drawLine(offset, i+7, file.Name(), false)
+			c.display.drawLine(offset, i+4, file.Name(), false)
 		}
 	}
 
@@ -148,18 +148,18 @@ func (c *Chip8) chooseROM() {
 		if key, ok := event.(*tcell.EventKey); ok {
 			if key.Key() == tcell.KeyUp {
 				if currentIdx > 0 {
-					c.display.drawLine(offset, currentIdx+7, roms[currentIdx], false)
+					c.display.drawLine(offset, currentIdx+4, roms[currentIdx], false)
 					currentIdx--
-					c.display.drawLine(offset, currentIdx+7, roms[currentIdx], true)
+					c.display.drawLine(offset, currentIdx+4, roms[currentIdx], true)
 					c.display.screen.Show()
 				}
 			}
 
 			if key.Key() == tcell.KeyDown {
 				if currentIdx < len(roms)-1 {
-					c.display.drawLine(offset, currentIdx+7, roms[currentIdx], false)
+					c.display.drawLine(offset, currentIdx+4, roms[currentIdx], false)
 					currentIdx++
-					c.display.drawLine(offset, currentIdx+7, roms[currentIdx], true)
+					c.display.drawLine(offset, currentIdx+4, roms[currentIdx], true)
 					c.display.screen.Show()
 				}
 			}
