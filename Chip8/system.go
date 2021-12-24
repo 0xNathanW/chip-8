@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const clockSpeed = (time.Second / 700)
+const clockSpeed = (time.Second / 500)
 
 type Chip8 struct {
 	//=====  CPU  =====//
