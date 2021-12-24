@@ -1,13 +1,12 @@
 package chip8
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
 )
 
-const clockSpeed = (time.Second / 500)
+const clockSpeed = (time.Second / 350)
 
 type Chip8 struct {
 	//=====  CPU  =====//
@@ -212,7 +211,6 @@ func (c *Chip8) LoadROM(file string) {
 		log.Fatal(err)
 	}
 	_size := info.Size()
-	fmt.Println("Size of program: ", _size)
 	if int(_size) >= len(c.memory) {
 		log.Fatal("Program you're trying to load is too large.")
 	}

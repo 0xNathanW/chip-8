@@ -1,10 +1,11 @@
 package chip8
 
 import (
-	"os"
 	"fmt"
-	"time"
 	"log"
+	"os"
+	"time"
+
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -18,11 +19,11 @@ func (c *Chip8) Run() {
 
 	c.chooseROM()
 
-	clock := time.NewTicker(c.ClockSpeed)	// the cpu clock.
-	screen := time.NewTicker(refreshRate)	// the screen refresh. 
-	timers := time.NewTicker(time.Second / 60)	// timers run at a set 60Hz rate.
+	clock := time.NewTicker(c.ClockSpeed)      // the cpu clock.
+	screen := time.NewTicker(refreshRate)      // the screen refresh.
+	timers := time.NewTicker(time.Second / 60) // timers run at a set 60Hz rate.
 
-	eventQ := make(chan tcell.Event)	// q for tcell events.
+	eventQ := make(chan tcell.Event) // q for tcell events.
 
 	// goroutine polls for events.
 	go func() {
@@ -43,8 +44,8 @@ func (c *Chip8) Run() {
 					c.keypad[k] = true
 				}
 				// p for pause.
-				if key.Rune() == 'p' {		
-					c.isPaused = true			
+				if key.Rune() == 'p' {
+					c.isPaused = true
 					c.paused()
 				}
 			}
@@ -63,7 +64,7 @@ func (c *Chip8) Run() {
 func (c *Chip8) paused() {
 
 	eventQ := make(chan tcell.Event)
-	
+
 	go func() {
 		for {
 			eventQ <- c.display.screen.PollEvent()
@@ -75,20 +76,20 @@ func (c *Chip8) paused() {
 			// escape key quits program
 			if key.Key() == tcell.KeyEsc {
 				c.display.screen.Clear()
+				c.display.screen.Fini()
 				os.Exit(0)
 			}
 			// pressing p again unpauses the emulator.
 			if key.Rune() == 'p' {
 				c.isPaused = false
-				return 
+				return
 			}
 			// r key restarts the emulator.
 			// allowing a new ROM to be loaded.
 			if key.Rune() == 'r' {
 				c.reset()
 				c.display.screen.Clear()
-				c.display.screen.Fini()
-				c.Run()
+				c.chooseROM()
 				return
 			}
 			// right arrow key steps forward one cycle..
@@ -106,7 +107,7 @@ func (c *Chip8) paused() {
 }
 
 func (c *Chip8) chooseROM() {
-	
+
 	c.display.fill()
 
 	offset := 10
@@ -128,7 +129,7 @@ func (c *Chip8) chooseROM() {
 		roms[i] = file.Name()
 		if i == 0 {
 			c.display.drawLine(offset, i+7, file.Name(), true)
-		} else{
+		} else {
 			c.display.drawLine(offset, i+7, file.Name(), false)
 		}
 	}
@@ -138,7 +139,7 @@ func (c *Chip8) chooseROM() {
 	eventQ := make(chan tcell.Event)
 
 	go func() {
-		for{
+		for {
 			eventQ <- c.display.screen.PollEvent()
 		}
 	}()
@@ -171,6 +172,7 @@ func (c *Chip8) chooseROM() {
 			}
 
 			if key.Key() == tcell.KeyEsc {
+				c.display.screen.Fini()
 				c.display.screen.Clear()
 				os.Exit(0)
 			}

@@ -35,9 +35,9 @@ func newDisplay() *display {
 		screen:     screen,
 		pixelArray: [64][32]int{},
 		scale:      2,
-		style:      tcell.StyleDefault.
-						Foreground(foreground).
-						Background(background),
+		style: tcell.StyleDefault.
+			Foreground(foreground).
+			Background(background),
 	}
 	return display
 }
@@ -46,14 +46,14 @@ func newDisplay() *display {
 func (d *display) draw() {
 	for y := 0; y < 32; y++ {
 		for x := 0; x < 64; x++ {
-			var char rune
 			if d.pixelArray[x][y] == 1 {
-				char = '█'
+				d.screen.SetContent(x*d.scale, y*(d.scale-1), ' ', nil, d.style.Reverse(true))
+				d.screen.SetContent(x*d.scale+1, y*(d.scale-1), ' ', nil, d.style.Reverse(true))
 			} else {
-				char = ' '
+				d.screen.SetContent(x*d.scale, y*(d.scale-1), ' ', nil, d.style)
+				d.screen.SetContent(x*d.scale+1, y*(d.scale-1), ' ', nil, d.style)
 			}
-			d.screen.SetContent(x*d.scale, y*(d.scale-1), char, nil, d.style)
-			d.screen.SetContent(x*d.scale+1, y*(d.scale-1), char, nil, d.style)
+
 		}
 	}
 }
@@ -61,11 +61,11 @@ func (d *display) draw() {
 // Draw a singular line of text to screen.
 func (d *display) drawLine(x int, y int, text string, highlight bool) {
 	if highlight {
-		for i:=0; i < len(text); i++ {
+		for i := 0; i < len(text); i++ {
 			d.screen.SetContent(x+i, y, rune(text[i]), nil, d.style.Reverse(true))
 		}
 	} else {
-		for i:=0; i < len(text); i++ {
+		for i := 0; i < len(text); i++ {
 			d.screen.SetContent(x+i, y, rune(text[i]), nil, d.style)
 		}
 	}
