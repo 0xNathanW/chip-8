@@ -106,8 +106,9 @@ func (c *Chip8) paused() {
 }
 
 func (c *Chip8) chooseROM() {
-	c.display.screen.Clear()
-	c.display.screen.Fill(' ', c.display.style)
+	
+	c.display.fill()
+
 	offset := 10
 
 	txt := "Select a ROM to run:"

@@ -70,3 +70,12 @@ func (d *display) drawLine(x int, y int, text string, highlight bool) {
 		}
 	}
 }
+
+// Fills 128x32 pixel array with background colour.
+func (d *display) fill() {
+	for y := 0; y < 32; y++ {
+		for x := 0; x < 128; x++ {
+			d.screen.SetContent(x, y, ' ', nil, d.style)
+		}
+	}
+}
