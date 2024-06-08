@@ -191,9 +191,7 @@ func (c *Chip8) LoadFontSet() {
 		0xF0, 0x80, 0xF0, 0x80, 0x80, //F
 	}
 
-	for i := range fontSet {
-		c.memory[i] = fontSet[i]
-	}
+	copy(c.memory[:], fontSet)
 }
 
 func (c *Chip8) LoadROM(file string) {

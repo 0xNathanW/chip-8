@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/0xNathanW/chip-8/chip8"
+
+	chip8 "github.com/0xNathanW/chip-8/Chip8"
 )
 
 func main() {

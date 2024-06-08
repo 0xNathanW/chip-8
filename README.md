@@ -18,9 +18,3 @@ Run the program, with optional flags -fg and -bg for foreground and background c
 
 Programs can be paused and unpaused by pressing `p`.  While paused the program can be exited by pressing `escape` or a new ROM can be loaded into memory by pressing `r`.
 
-## TODO ##
-
-- [ ] Address performance issues PC vs Mac
-- [ ] Instructions on menu screen
-- [ ] Step backwards through opcodes
-- [ ] Display opcode info on stepthrough

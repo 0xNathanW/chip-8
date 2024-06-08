@@ -48,6 +48,10 @@ func (c *Chip8) Run() {
 					c.isPaused = true
 					c.paused()
 				}
+				if key.Key() == tcell.KeyEsc {
+					c.display.screen.Fini()
+					os.Exit(0)
+				}
 			}
 
 		case <-timers.C:
